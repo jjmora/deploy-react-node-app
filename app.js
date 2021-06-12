@@ -47,25 +47,29 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+///// SCHEDULE TASK /////
 
 //schedule (https://crontab.guru/)
 let time = 0
 
-//GET crypto data
+//GET crypto data from Coingecko
 const request = require('request')
 let responseBody = []
 
 let curr_price = ''
 let new_price = ''
 
-request({
-  url: 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false',
-  json: true
-}, (err, response, body) => {
-  responseBody = body
-})
+function getCryptoValue(){
+  request({
+    url: 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false',
+    json: true
+  }, (err, response, body) => {
+    responseBody = body
+  })
+}
 
-schedule.scheduleJob('crypto-job','*/2 * * * * *', () => {
+schedule.scheduleJob('crypto-job','*/10 * * * * *', () => {
+  getCryptoValue()
   time = time +1
   console.log(time)
   console.log(`BTC : ${responseBody[0]["current_price"]} / ${time}`)
@@ -83,6 +87,6 @@ schedule.scheduleJob('crypto-job','*/2 * * * * *', () => {
     schedule.cancelJob('crypto-job')
   }
 })
-
+///// SCHEDULE TASK END /////
 
 module.exports = app;
